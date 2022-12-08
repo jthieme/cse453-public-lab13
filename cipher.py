@@ -2,17 +2,24 @@
 # COMPONENT:
 #    CIPHER01
 # Author:
-#    Br. Helfrich, Kyle Mueller, <your name here if you made a change>
+#    Br. Helfrich, Kyle Mueller, Josh Thieme
 # Summary:
-#    Implement your cipher here. You can view 'example.py' to see the
-#    completed Caesar Cipher example.
+#    The Playfair cipher starts by creating a perfect square matrix.
+#    It then loops through the message, using 2 iterators at a time, then
+#    looks up the index of each of those in the matrix, and depending on
+#    how the two iterators compare with each others index, then it performs
+#    a mathmatical calculation. If there is no relationship, then it simply
+#    adds each others indices together. Either of these ways is what actually
+#    encrypts the message. To decrypt, it performs the exact same method, with
+#    the only difference being it increments by -1, rather than 1 which happens
+#    when it encrypts a message.
 ##############################################################################
 
 
 ##############################################################################
 # CIPHER
 ##############################################################################
-class Cipher:
+class PlayfairCipher:
     def __init__(self):
         self.size = 10
         self.row = self.size
@@ -76,16 +83,14 @@ class Cipher:
         # helper method
         pc += "playfair(key, message, inc):\n" \
               "  matrix <- create_matrix(key)\n" \
-              "  message <- message.upper()\n" \
-              "  message.replace(' ', '')\n" \
               "  message.separate_same_letters(message)\n"\
               "  FOR (l1, l2) in zip(message[0::2], message[1::2]):\n" \
               "    row1, col1 <- index_of(l1, matrix)\n" \
               "    row2, col2 <- index_of(l2, matrix)\n" \
               "    IF row1 == row2:\n"\
-              "      cipher_text <- matrix[row1][(col1 + inc) % 10] + matrix[row2][(col2 + inc) % 10]\n" \
+              "      cipher_text <- matrix[row1][(col1 + inc) % self.size] + matrix[row2][(col2 + inc) % self.size]\n" \
               "    ELIF col1 == col2:\n" \
-              "      cipher_text <- matrix[(row1 + inc) % 10][col1] + matrix[(row2 + inc) % 10][col2]\n" \
+              "      cipher_text <- matrix[(row1 + inc) % self.size][col1] + matrix[(row2 + inc) % self.size][col2]\n" \
               "    ELSE:\n" \
               "      cipher_text <- matrix[row1][col2] + matrix[row2][col1]\n"\
               "  RETURN cipher_text\n\n"
@@ -251,6 +256,7 @@ class Cipher:
         message = self.separate_same_letters(message)
         cipher_text = ''
 
+    
         # loop through two indices at once
         for (l1, l2) in zip(message[0::2], message[1::2]):
             
@@ -265,11 +271,10 @@ class Cipher:
             
             # Rule 3: The letters are in the same column
             elif col1 == col2:
-                 cipher_text += matrix[(row1 + inc) % self.size][col1] + matrix[(row2 + inc) % self.size][col2]
+                cipher_text += matrix[(row1 + inc) % self.size][col1] + matrix[(row2 + inc) % self.size][col2]
             
             # Rule 4: The letters are in a different row and column
             else:
                 cipher_text += matrix[row1][col2] + matrix[row2][col1]
-
+        
         return cipher_text
-
