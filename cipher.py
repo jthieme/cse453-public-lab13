@@ -14,14 +14,14 @@
 ##############################################################################
 class Cipher:
     def __init__(self):
-        pass
+        self.size = 10
+        self.row = self.size
+        self.col = self.size
 
     def get_author(self):
-        # TODO: Return your name
         return "Josh Thieme"
 
     def get_cipher_name(self):
-        # TODO: Return the cipher name
         return "Playfair Cipher"
 
     ##########################################################################
@@ -29,7 +29,6 @@ class Cipher:
     # Returns the citation from which we learned about the cipher
     ##########################################################################
     def get_cipher_citation(self):
-        # TODO: This function should return your citation(s)
         return "\nPractical Cryptography, \n" \
                "'PlayFair Cipher', \n" \
                "retreived: \n\thttp://practicalcryptography.com/ciphers/classical-era/playfair/"
@@ -41,21 +40,55 @@ class Cipher:
     def get_pseudocode(self):
 
         # main helper method
-        pc = "playfair(key, message, inc):\n" \
-             "  matrix <- create_matrix(key)\n" \
-             "  message <- message.upper()\n" \
-             "  message.replace(' ', '')\n" \
-             "  message.separate_same_letters(message)\n"\
-             "  FOR (l1, l2) in zip(message[0::2], message[1::2]):\n" \
-             "    row1, col1 <- index_of(l1, matrix)\n" \
-             "    row2, col2 <- index_of(l2, matrix)\n" \
-             "    IF row1 == row2:\n"\
-             "      cipher_text <- matrix[row1][(col1 + inc) % 5] + matrix[row2][(col2 + inc) % 5]\n" \
-             "    ELIF col1 == col2:\n" \
-             "      cipher_text <- matrix[(row1 + inc) % 5][col1] + matrix[(row2 + inc) % 5][col2]\n" \
+        pc = "create_matrix(self, key):\n" \
+             "  key <- key.upper()\n" \
+             "  fillers <- ['ç', 'è', 'é', 'ê', 'ë']\n" \
+             "  matrix <- [['' for i in range(10)] for j in range(10)]\n" \
+             "  letters_added <- []\n" \
+             "  row <- 0\n" \
+             "  col <- 0\n" \
+             "  FOR letter IN key:\n" \
+             "    IF letter NOT IN letters_added:\n" \
+             "      matrix[row][col] <- letter\n" \
+             "        letters_added.append(letter)\n" \
              "    ELSE:\n" \
-             "      cipher_text <- matrix[row1][col2] + matrix[row2][col1]\n"\
-             "  RETURN cipher_text\n\n"
+             "      CONTINUE\n" \
+             "    IF col == 4:\n" \
+             "      col <- 0\n" \
+             "      row <- 1\n" \
+             "    ELSE:\n" \
+             "      col <- 1\n" \
+             "  i <- 0\n" \
+             "  FOR letter IN range(32,132):\n" \
+             "    IF letter < 127:\n" \
+             "      IF chr(letter) NOT IN letters_added:\n" \
+             "        letters_added.append(chr(letter))\n" \
+             "      ELSE:\n" \
+             "        letters_added.append(fillers[i])\n" \
+             "        i <- 1\n" \
+             "  index <- 0\n" \
+             "  FOR i IN range(10):\n" \
+             "    FOR j IN range(10):\n" \
+             "      matrix[i][j] = letters_added[index]\n" \
+             "      index <- 1\n" \
+             "  RETURN matrix\n\n" \
+        
+        # helper method
+        pc += "playfair(key, message, inc):\n" \
+              "  matrix <- create_matrix(key)\n" \
+              "  message <- message.upper()\n" \
+              "  message.replace(' ', '')\n" \
+              "  message.separate_same_letters(message)\n"\
+              "  FOR (l1, l2) in zip(message[0::2], message[1::2]):\n" \
+              "    row1, col1 <- index_of(l1, matrix)\n" \
+              "    row2, col2 <- index_of(l2, matrix)\n" \
+              "    IF row1 == row2:\n"\
+              "      cipher_text <- matrix[row1][(col1 + inc) % 10] + matrix[row2][(col2 + inc) % 10]\n" \
+              "    ELIF col1 == col2:\n" \
+              "      cipher_text <- matrix[(row1 + inc) % 10][col1] + matrix[(row2 + inc) % 10][col2]\n" \
+              "    ELSE:\n" \
+              "      cipher_text <- matrix[row1][col2] + matrix[row2][col1]\n"\
+              "  RETURN cipher_text\n\n"
 
         # The encrypt pseudocode
         pc += "encrypt(key, message):\n" \
@@ -101,8 +134,13 @@ class Cipher:
     # and ensure that no duplicate letters are within the matrix
     ##########################################################################
     def create_matrix(self, key):
+        
+        # initialize needed variables
         key = key.upper()
-        matrix = [[0 for i in range(5)] for j in range(5)]
+
+        # give bogus values to keep things working
+        fillers = ['ç', 'è', 'é', 'ê', 'ë']
+        matrix = [['' for i in range(self.row)] for j in range(self.col)]
         letters_added = []
         row = 0
         col = 0
@@ -114,27 +152,38 @@ class Cipher:
                 letters_added.append(letter)
             else:
                 continue
-            if col == 4:
+            if col == self.size - 1:
                 col = 0
                 row += 1
             else:
                 col += 1
         
         # Add the rest of the alphabet to the matrix
+        # ' ': 32, ~: 126 
         # A: 65, Z: 90
-        for letter in range(65,91):
-            
-            # I / J are in the same position
-            if letter == 74:
-                continue
+        # fillers['\n', '\t', '\r', '\!', '\#']
+        #          127   128   129   130   131
 
-            # Cannot add repeated letters
-            if chr(letter) not in letters_added:
-                letters_added.append(chr(letter))
-            
+        # index for the filler list
+        i = 0
+        for letter in range(32,132):
+            # when we reach the end of the 95 normal characters
+            # then use our 5 filler characters   
+            if letter < 127:       
+                # Cannot add repeated letters
+                if chr(letter) not in letters_added:
+                    letters_added.append(chr(letter))
+            # add our our bogus "characters" to make a perfect 10x10 matrix
+            else:
+                letters_added.append(fillers[i])
+                i += 1
+        
+        # replace the initial values ('') with everything
+        # inside the letters_added list
         index = 0
-        for i in range(5):
-            for j in range(5):
+
+        for i in range(self.row):
+            for j in range(self.col):
                 matrix[i][j] = letters_added[index]
                 index += 1
         
@@ -157,7 +206,7 @@ class Cipher:
             if index == len(message) - 1:
 
                 # note that we reached the end of the message
-                message = message + 'X'
+                # message = message + 'X'
                 index += 2
                 continue
             
@@ -167,7 +216,8 @@ class Cipher:
             # if the current and next letters are the same
             if l1 == l2:
                 # note that they are the same with an X in between the letters
-                message = message[:index + 1] + "X" + message[index + 1:]
+                # message = message[:index + 1] + "X" + message[index + 1:]
+                message = message[:index + 1] + message[index + 1:]
             index += 2
        
         return message
@@ -179,7 +229,7 @@ class Cipher:
     ##########################################################################
     def index_of(self, letter, matrix):
         # for every letter
-        for i in range(5):
+        for i in range(100):
             try:
                 # find the index and return it
                 index = matrix[i].index(letter)
@@ -196,8 +246,8 @@ class Cipher:
         
         # initialize variables we will need
         matrix = self.create_matrix(key)
-        message = message.upper()
-        message = message.replace(' ', '')
+        # message = message.upper()
+        # message = message.replace(' ', '')
         message = self.separate_same_letters(message)
         cipher_text = ''
 
@@ -211,11 +261,11 @@ class Cipher:
 
             # Rule 2: Letters are in same row
             if row1 == row2:
-                cipher_text += matrix[row1][(col1 + inc) % 5] + matrix[row2][(col2 + inc) % 5]
+                cipher_text += matrix[row1][(col1 + inc) % self.size] + matrix[row2][(col2 + inc) % self.size]
             
             # Rule 3: The letters are in the same column
             elif col1 == col2:
-                 cipher_text += matrix[(row1 + inc) % 5][col1] + matrix[(row2 + inc) % 5][col2]
+                 cipher_text += matrix[(row1 + inc) % self.size][col1] + matrix[(row2 + inc) % self.size][col2]
             
             # Rule 4: The letters are in a different row and column
             else:
