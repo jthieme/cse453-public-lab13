@@ -38,7 +38,10 @@ class PlayfairCipher:
     def get_cipher_citation(self):
         return "\nPractical Cryptography, \n" \
                "'PlayFair Cipher', \n" \
-               "retreived: \n\thttp://practicalcryptography.com/ciphers/classical-era/playfair/"
+               "retreived: \n\thttp://practicalcryptography.com/ciphers/classical-era/playfair/\n\n"\
+               "\ndCode, \n" \
+               "'PlayFair Cipher', \n" \
+               "retreived: \n\thttps://www.dcode.fr/playfair-cipher"
 
     ##########################################################################
     # GET PSEUDOCODE
