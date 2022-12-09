@@ -53,7 +53,7 @@ class PlayfairCipher:
         pc = "create_matrix(self, key):\n" \
              "  key <- key.upper()\n" \
              "  fillers <- ['ç', 'è', 'é', 'ê', 'ë']\n" \
-             "  matrix <- [['' for i in range(10)] for j in range(10)]\n" \
+             "  matrix <- [['' for i in range(self.row)] for j in range(self.col)]\n" \
              "  letters_added <- []\n" \
              "  row <- 0\n" \
              "  col <- 0\n" \
@@ -77,8 +77,8 @@ class PlayfairCipher:
              "        letters_added.append(fillers[i])\n" \
              "        i <- 1\n" \
              "  index <- 0\n" \
-             "  FOR i IN range(10):\n" \
-             "    FOR j IN range(10):\n" \
+             "  FOR i IN range(self.row):\n" \
+             "    FOR j IN range(self.col):\n" \
              "      matrix[i][j] = letters_added[index]\n" \
              "      index <- 1\n" \
              "  RETURN matrix\n\n" \
@@ -138,7 +138,7 @@ class PlayfairCipher:
 
     ##########################################################################
     # CREATE MATRIX
-    # Create a 5 x 5 matrix while using the key that Playfair depends on, 
+    # Create a 10 x 10 matrix while using the key that Playfair depends on, 
     # and ensure that no duplicate letters are within the matrix
     ##########################################################################
     def create_matrix(self, key):
@@ -169,8 +169,8 @@ class PlayfairCipher:
         # Add the rest of the alphabet to the matrix
         # ' ': 32, ~: 126 
         # A: 65, Z: 90
-        # fillers['\n', '\t', '\r', '\!', '\#']
-        #          127   128   129   130   131
+        # fillers['ç', 'è', 'é', 'ê', 'ë']
+        #        127   128   129   130   131
 
         # index for the filler list
         i = 0
